@@ -1,8 +1,14 @@
 <template>
-  <q-layout view="hHh lpR fFf">
-    <q-header elevated class="bg-primary text-white text-left">
+  <q-layout view="lHh lpR lFf">
+    <q-header class="mx-8 my-4 rounded drop-shadow-lg">
       <q-toolbar>
-        <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
+        <q-btn
+          class="visible md:invisible"
+          dense
+          flat
+          round
+          icon="menu"
+          @click="toggleLeftDrawer" />
 
         <q-toolbar-title>
           <q-avatar>
@@ -13,22 +19,38 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer show-if-above v-model="leftDrawerOpen" side="left" bordered>
+    <q-drawer
+      show-if-above
+      v-model="leftDrawerOpen"
+      side="left"
+      bordered
+      :mini="miniState"
+      @mouseover="miniState = false"
+      @mouseout="miniState = true"
+      mini-to-overlay>
       <!-- drawer content -->
-      <q-list bordered separator class="min-w-25 pa-4">
-        <template v-for="(item, index) in generatedRoutes">
-          <q-item clickable :key="index" v-if="item.name != 'index'" class="flex-col">
-            <q-item-section class="cursor-pointer" @click="router.push({ path: item.path })">
-              {{ item.name }}
+      <q-list bordered padding>
+        <template v-for="(item, index) in generatedRoutes" :key="index">
+          <q-item
+            clickable
+            :active="item.name === item.path"
+            :to="item.path"
+            v-if="item.meta?.layout == null  || item.meta?.layout == 'default'"
+            exact>
+            <q-item-section avatar>
+              <q-icon :name="item.meta?.icon ? item.meta?.icon : 'inbox'" />
+            </q-item-section>
+            <q-item-section class="cursor-pointer" style="text-transform: capitalize">
+              {{ item.name == 'index' ? 'Home' :   item.name.replace('-', ' ')}}
             </q-item-section>
           </q-item>
         </template>
       </q-list>
     </q-drawer>
 
+    <!-- Content -->
     <q-page-container>
-      <div class="py-2 mx-auto text-center text-sm">[Default Layout]</div>
-      <router-view v-slot="{ Component }">
+      <router-view class="pt-4" v-slot="{ Component }">
         <transition name="slide-fade" mode="out-in">
           <component :is="Component" />
         </transition>
@@ -48,6 +70,8 @@
   const toggleLeftDrawer = () => {
     leftDrawerOpen.value = !leftDrawerOpen.value
   }
+
+  const miniState = ref(true)
 </script>
 <style lang="scss">
   .slide-fade-enter {
